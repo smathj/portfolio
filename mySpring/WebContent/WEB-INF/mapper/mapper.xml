@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+                        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="test_db">
+
+
+
+	<insert id="insert_data"
+		parameterType="kr.co.mySpring.beans.DataBean">
+		<![CDATA[
+			insert into spring_mvc_table (data1, data2, data3)
+			values (#{data1}, #{data2}, #{data3}) 
+		]]>
+	</insert>
+	<select id='select_data'
+		resultType="kr.co.mySpring.beans.DataBean">
+		<![CDATA[
+			select data1, data2, data3 from spring_mvc_table
+		]]>
+	</select>
+
+	<!-- 회원가입 -->
+
+	<insert id="join" parameterType="kr.co.mySpring.UserVO.UserVO">
+		<![CDATA[
+			INSERT INTO USER (account,password,name)
+			VALUES (#{account}, #{password}, #{name}) 
+		]]>
+	</insert>
+	
+	<!-- 로그인 -->
+
+	<select id='login' parameterType="kr.co.mySpring.UserVO.UserVO" resultType="kr.co.mySpring.UserVO.UserVO">
+		<![CDATA[
+			SELECT * 
+			FROM USER 
+			WHERE ACCOUNT = #{account} 
+						AND password = #{password}
+		]]>
+	</select>
+
+
+
+
+</mapper>

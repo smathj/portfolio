@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:mvc="http://www.springframework.org/schema/mvc"
+			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xmlns="http://www.springframework.org/schema/beans"
+			 xmlns:context="http://www.springframework.org/schema/context"
+			 xsi:schemaLocation="http://www.springframework.org/schema/mvc
+			 					 http://www.springframework.org/schema/mvc/spring-mvc.xsd
+			 					 http://www.springframework.org/schema/beans
+			 					 http://www.springframework.org/schema/beans/spring-beans.xsd
+			 					 http://www.springframework.org/schema/context
+			 					 http://www.springframework.org/schema/context/spring-context.xsd">
+			 					 
+	<!-- 스캔한 패지키 내부의 클래스 중 Controller 어노테이션을 가지고 있는 클래스들을 Controller로 로딩하도록 한다 -->
+	<mvc:annotation-driven/>
+	
+	
+	<!-- 스캔할 bean들이 모여있는 패키지를 지정한다. -->
+	<context:component-scan base-package="kr.co.mySpring.file.*"/>
+	<context:component-scan base-package="kr.co.mySpring.UserVO"/>
+	<context:component-scan base-package="kr.co.mySpring.*"/>
+	
+	<context:component-scan base-package="kr.co.mySpring.controller"/>
+	<context:component-scan base-package="kr.co.mySpring.Excel.controller"/>
+	<context:component-scan base-package="kr.co.mySpring.mail.controller"/>
+	<context:component-scan base-package="kr.co.mySpring.join.controller"/>
+	
+	
+	<!-- Controller의 메서드에서 반환하는 문자열 앞 뒤에 붙힐 경로 정보를 셋팅한다. -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+	
+	
+	<!-- 정적파일(이미지, 사운드, 동영상, JS, CSS 등등) 경로 셋팅 -->
+	<mvc:resources mapping="/**" location="/resources/"/>
+	
+	
+	<!-- properties 파일의 내용을 사용할 수 있도록 Bean을 정의한다 (여러개 등록시 list로 등록) -->
+	<bean class='org.springframework.beans.factory.config.PropertyPlaceholderConfigurer'>
+		<property name="location">
+				<value>/WEB-INF/properties/db.properties</value>
+				<!-- <list>/WEB-INF/properties/db.properties</list> -->
+		</property>
+	</bean>
+
+	<bean class='org.apache.commons.dbcp2.BasicDataSource' id='basic_data_source'>
+		<property name='driverClassName' value='${db.classname}'/>
+		<property name="url" value="${db.url}"/>
+		<property name="username" value='${db.username}'/>
+		<property name="password" value='${db.password}'/>
+	</bean>
+	
+	
+	<bean class='org.mybatis.spring.SqlSessionFactoryBean' id='sqlSession'>
+		<property name="dataSource" ref='basic_data_source'/>
+		<property name="mapperLocations" value='/WEB-INF/mapper/*.xml'/>			<!-- 이 위치에있는 xml들을 mapper로 사용 -->
+		<property name="configLocation" value="/WEB-INF/config/mybatis-config.xml" />	<!-- 이 파일에다 절대경로를 단축한 alias 사용 -->
+<!-- 		<property name="mapperLocations" value="classpath:com/bandai/**/**/mappers/*-mapper.xml" /> -->
+	</bean>
+			
+				
+	<bean class='org.mybatis.spring.SqlSessionTemplate' id='sqlSessionTemplate'>
+		<constructor-arg index='0' ref='sqlSession'/>
+	</bean>
+		
+		
+	<!-- 메일 보내기 서비스 bean생성 -->			 
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+			<property name="host" value="smtp.gmail.com"></property>
+			<property name="port" value="587"></property>
+			<property name="username" value="smathj92@gmail.com"></property>
+			<property name="password" value="rlatjdwns1!"></property>
+			<property name="javaMailProperties">
+				<props>
+					<prop key="mail.smtp.auth">true</prop>
+					<prop key="mail.smtp.starttls.enable">true</prop>
+				</props>
+			</property>
+	</bean>
+	
+	
+	<bean id="LoginInterceptor" class="kr.co.mySpring.interceptor.LoginInterceptor"/>
+	
+	<mvc:interceptors>
+	  <mvc:interceptor>
+	    <mvc:mapping path="/**"/>
+	    <mvc:exclude-mapping path="/login.do"/>
+	    <mvc:exclude-mapping path="/join.do"/>
+	    <mvc:exclude-mapping path="/joinPage.do"/>
+	    <mvc:exclude-mapping path="/boardList.do"/>
+	    <mvc:exclude-mapping path="/"/>
+	    <ref bean="LoginInterceptor"/>
+	  </mvc:interceptor>
+	</mvc:interceptors>
+
+</beans>
+
+
+
+
+
+
+
+
+
+
+
+
